@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murottal Al-Qur'an - Jagel App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a5f3f 0%, #2d8659 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .mosque-icon {
+            width: 50px;
+            height: 50px;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .player-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .current-track {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .current-track h3 {
+            color: #1a5f3f;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .current-track p {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .control-btn {
+            background: #1a5f3f;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            background: #2d8659;
+            transform: scale(1.1);
+        }
+        
+        .control-btn.play-pause {
+            width: 50px;
+            height: 50px;
+            background: #d4af37;
+        }
+        
+        .control-btn.play-pause:hover {
+            background: #b8941f;
+        }
+        
+        .progress-container {
+            background: #e0e0e0;
+            height: 6px;
+            border-radius: 3px;
+            margin: 10px 0;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #1a5f3f, #d4af37);
+            height: 100%;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #1a5f3f;
+            cursor: pointer;
+        }
+        
+        .juz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .juz-card {
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 15px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .juz-card:hover {
+            background: #e9ecef;
+            border-color: #d4af37;
+            transform: translateY(-2px);
+        }
+        
+        .juz-card.active {
+            background: linear-gradient(135deg, #1a5f3f 0%, #2d8659 100%);
+            color: white;
+            border-color: #d4af37;
+        }
+        
+        .juz-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .juz-card.active .juz-number {
+            color: #d4af37;
+        }
+        
+        .juz-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a5f3f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .juz-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 8px;
+            }
+            
+            .control-btn {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .control-btn.play-pause {
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-book-quran"></i> Murottal Al-Qur'an</h1>
+            <p>Mishary Rasyid Al-Afasy</p>
+            <svg class="mosque-icon" viewBox="0 0 100 100">
+                <rect x="5" y="75" width="90" height="20" fill="#8B4513" opacity="0.8"/>
+                <rect x="25" y="45" width="50" height="30" fill="#F5DEB3"/>
+                <ellipse cx="50" cy="40" rx="28" ry="18" fill="#D4AF37"/>
+                <path d="M22 40 Q50 15 78 40" fill="#FFD700"/>
+                <path d="M50 15 Q56 10 62 15 Q56 13 50 15" fill="#FFF8DC"/>
+                <rect x="12" y="25" width="12" height="50" fill="#F5DEB3"/>
+                <ellipse cx="18" cy="23" rx="8" ry="6" fill="#D4AF37"/>
+                <rect x="16" y="15" width="4" height="8" fill="#D4AF37"/>
+                <circle cx="18" cy="13" r="3" fill="#FFD700"/>
+                <rect x="76" y="25" width="12" height="50" fill="#F5DEB3"/>
+                <ellipse cx="82" cy="23" rx="8" ry="6" fill="#D4AF37"/>
+                <rect x="80" y="15" width="4" height="8" fill="#D4AF37"/>
+                <circle cx="82" cy="13" r="3" fill="#FFD700"/>
+                <path d="M35 75 Q50 55 65 75 L65 60 L35 60 Z" fill="#8B4513"/>
+                <rect x="42" y="65" width="16" height="10" fill="#654321"/>
+                <rect x="30" y="50" width="8" height="8" fill="#87CEEB" rx="2"/>
+                <rect x="62" y="50" width="8" height="8" fill="#87CEEB" rx="2"/>
+            </svg>
+        </div>
+
+        <div class="player-container">
+            <div class="current-track">
+                <h3 id="currentJuz">Pilih Juz untuk Memulai</h3>
+                <p id="currentReciter">Mishary Rasyid Al-Afasy</p>
+            </div>
+            
+            <audio id="audioPlayer" preload="metadata"></audio>
+            
+            <div class="controls">
+                <button class="control-btn" id="prevBtn" title="Sebelumnya">
+                    <i class="fas fa-backward"></i>
+                </button>
+                <button class="control-btn play-pause" id="playPauseBtn" title="Play/Pause">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="control-btn" id="nextBtn" title="Berikutnya">
+                    <i class="fas fa-forward"></i>
+                </button>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            
+            <div class="volume-control">
+                <i class="fas fa-volume-down"></i>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <i class="fas fa-volume-up"></i>
+            </div>
+        </div>
+
+        <div class="juz-grid" id="juzGrid">
+            <!-- Juz cards akan di-generate oleh JavaScript -->
+        </div>
+        
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Memuat audio...</p>
+        </div>
+
+        <div class="footer">
+            <p><i class="fas fa-heart"></i> Semoga bermanfaat</p>
+        </div>
+    </div>
+
+    <script>
+        // Data juz links
+        const juzLinks = [
+            'http://j.mp/2b8SiNO', 'http://j.mp/2b8RJmQ', 'http://j.mp/2bFSrtF', 'http://j.mp/2b8SXi3', 'http://j.mp/2b8RZm3',
+            'http://j.mp/28MBohs', 'http://j.mp/2bFRIZC', 'http://j.mp/2bufF7o', 'http://j.mp/2byr1bu', 'http://j.mp/2bHfyUH',
+            'http://j.mp/2bHf80y', 'http://j.mp/2bWnTby', 'http://j.mp/2bFTiKQ', 'http://j.mp/2b8SUTA', 'http://j.mp/2bFRQIM',
+            'http://j.mp/2b8SegG', 'http://j.mp/2brHsFz', 'http://j.mp/2b8SCfc', 'http://j.mp/2bFSq95', 'http://j.mp/2brI1zc',
+            'http://j.mp/2b8VcBO', 'http://j.mp/2bFRxNP', 'http://j.mp/2brItxm', 'http://j.mp/2brHKw5', 'http://j.mp/2brImlf',
+            'http://j.mp/2bFRHF2', 'http://j.mp/2bFRXno', 'http://j.mp/2brI3ai', 'http://j.mp/2bFRyBF', 'http://j.mp/2bFREcc'
+        ];
+
+        // Element references
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const currentJuzEl = document.getElementById('currentJuz');
+        const juzGrid = document.getElementById('juzGrid');
+        const loading = document.getElementById('loading');
+
+        // State
+        let currentJuz = -1;
+        let isPlaying = false;
+        let isLoading = false;
+
+        // Generate juz cards
+        function generateJuzCards() {
+            juzLinks.forEach((link, index) => {
+                const card = document.createElement('div');
+                card.className = 'juz-card';
+                card.innerHTML = `
+                    <div class="juz-number">${index + 1}</div>
+                    <div class="juz-label">Juz ${index + 1}</div>
+                `;
+                card.addEventListener('click', () => loadJuz(index));
+                juzGrid.appendChild(card);
+            });
+        }
+
+        // Load juz
+        async function loadJuz(juzIndex) {
+            if (isLoading) return;
+            
+            currentJuz = juzIndex;
+            const link = juzLinks[juzIndex];
+            
+            // Update UI
+            document.querySelectorAll('.juz-card').forEach((card, index) => {
+                card.classList.toggle('active', index === juzIndex);
+            });
+            
+            currentJuzEl.textContent = `Juz ${juzIndex + 1}`;
+            
+            // Show loading
+            isLoading = true;
+            loading.style.display = 'block';
+            
+            try {
+                // Load audio
+                audioPlayer.src = link;
+                audioPlayer.load();
+                
+                // Wait for audio to be ready
+                await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        resolve();
+                    }, 5000); // Timeout 5 detik
+                    
+                    audioPlayer.addEventListener('canplay', () => {
+                        clearTimeout(timeout);
+                        resolve();
+                    }, { once: true });
+                    
+                    audioPlayer.addEventListener('error', () => {
+                        clearTimeout(timeout);
+                        reject(new Error('Audio load failed'));
+                    }, { once: true });
+                });
+                
+                // Hide loading
+                isLoading = false;
+                loading.style.display = 'none';
+                
+                // Auto play if was playing
+                if (isPlaying) {
+                    try {
+                        await audioPlayer.play();
+                    } catch (e) {
+                        isPlaying = false;
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                isLoading = false;
+                loading.style.display = 'none';
+                alert('Gagal memuat audio. Silakan coba lagi.');
+            }
+        }
+
+        // Toggle play/pause
+        function togglePlayPause() {
+            if (currentJuz === -1) {
+                loadJuz(0);
+                return;
+            }
+            
+            if (isPlaying) {
+                audioPlayer.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            } else {
+                audioPlayer.play().catch(e => {
+                    console.log('Play error:', e);
+                });
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Update progress
+        function updateProgress() {
+            if (audioPlayer.duration) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progressBar.style.width = progress + '%';
+                
+                currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+                durationEl.textContent = formatTime(audioPlayer.duration);
+            }
+        }
+
+        // Format time
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Set progress
+        function setProgress(e) {
+            if (audioPlayer.duration) {
+                const width = progressContainer.clientWidth;
+                const clickX = e.offsetX;
+                audioPlayer.currentTime = (clickX / width) * audioPlayer.duration;
+            }
+        }
+
+        // Previous juz
+        function prevJuz() {
+            if (currentJuz > 0) {
+                loadJuz(currentJuz - 1);
+            }
+        }
+
+        // Next juz
+        function nextJuz() {
+            if (currentJuz < juzLinks.length - 1) {
+                loadJuz(currentJuz + 1);
+            }
+        }
+
+        // Event listeners
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        prevBtn.addEventListener('click', prevJuz);
+        nextBtn.addEventListener('click', nextJuz);
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+        audioPlayer.addEventListener('ended', () => {
+            isPlaying = false;
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            if (currentJuz < juzLinks.length - 1) {
+                nextJuz();
+                setTimeout(() => {
+                    if (isPlaying) audioPlayer.play();
+                }, 500);
+            }
+        });
+        progressContainer.addEventListener('click', setProgress);
+        volumeSlider.addEventListener('input', (e) => {
+            audioPlayer.volume = e.target.value / 100;
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayPause();
+            } else if (e.code === 'ArrowLeft') {
+                prevJuz();
+            } else if (e.code === 'ArrowRight') {
+                nextJuz();
+            }
+        });
+
+        // Initialize
+        audioPlayer.volume = 0.7;
+        generateJuzCards();
+    </script>
+</body>
+</html>
